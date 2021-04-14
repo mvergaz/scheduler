@@ -1,0 +1,35 @@
+{
+    "name": "scheduler",
+    "version": "1.0.0",
+    "description": "Scheduler Microservice",
+    "main": "index.js",
+    "jest": {
+        "watchPathIgnorePatterns": [
+            "config.json", "schedules.json"
+        ]
+    },
+    "scripts": {
+        "serve": "pm2 start node . --name scheduler --watch",
+        "test": "jest -i --watch --verbose --coverage --coverageDirectory='coverage'"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mvergaz/scheduler.git"
+    },
+    "keywords": [
+        "development support"
+    ],
+    "author": "Manuel Vergaz Aguilera",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/mvergaz/scheduler/issues"
+    },
+    "homepage": "https://github.com/mvergaz/scheduler#readme",
+    "dependencies": {
+        "express": "^4.17.1"
+    },
+    "devDependencies": {
+        "jest": "^26.6.3",
+        "supertest": "^6.1.3"
+    }
+}

@@ -1,0 +1,12 @@
+[
+    {
+        "key": "port number",
+        "value": 3010,
+        "comments": "Service port number ( > 3000). Use this configuration if port 3000 is already in use. Optional"
+    },
+    {
+        "key": "interval",
+        "value": 5000,
+        "comments": "Interval milisecons between each schedule loop. By default 6000"
+    }
+]
