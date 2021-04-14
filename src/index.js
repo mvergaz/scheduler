@@ -26,7 +26,7 @@ if (fs.existsSync(configFile)) {
     process.exit(0)
 }
 
-//require('./routes')(app);
+require('./routes')(app);
 const server = app.listen(process.env.PORT || listenerPort, () =>
     console.log("logger microservice listening on http://localhost:" + listenerPort)
 )

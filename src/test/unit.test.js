@@ -18,7 +18,6 @@ describe('service unit tests', () => {
         fs.writeFileSync(serviceLogFile, '')
         fs.writeFileSync(errorLogFile, '')
         fs.writeFileSync(responsesLogFile, '')
-
     })
 
     test('expects the config file to exist', async () => {
@@ -52,7 +51,8 @@ describe('service unit tests', () => {
     })
 
     test('expects scheduler to detect JSON Syntax Error in schedules.json', async () => {
-        let expectedError = 'runScheduler - JSONSyntaxError: Unexpected token } in JSON';
+
+        let expectedError = 'schedules - JSONSyntaxError: Unexpected token } in JSON';
         let schedulesJsonContent = fs.readFileSync(schedulesFile).toString()
         fs.appendFileSync(schedulesFile, "}")
         schedulerRunner()
@@ -119,7 +119,7 @@ describe('service unit tests', () => {
     })
 
     test('expects schedulesDb.all() to return []', async () => {
-        let destinationFile = path.resolve(process.env.PWD, 'schedules.json.temp')
+        let destinationFile = path.resolve(process.env.PWD, 'trash','schedules.json.trash')
         fs.copyFileSync(schedulesFile, destinationFile)
         fs.writeFileSync(schedulesFile, ".")
         let schedules = schedulesDb.all()        

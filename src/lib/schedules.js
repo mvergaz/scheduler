@@ -5,8 +5,34 @@ const fs = require('fs')
     , schedulerFile = path.resolve(process.env.PWD, 'schedules.json')
     , logger = require('./logger')
 
-/**
- * 
+const validateSchedule = (v) =>{
+    return {
+        name: v.name,
+        endPoint: {
+            protocol: v.endPoint.protocol || "http:",
+            hostname: v.endPoint.hostname || "localhost",
+            port: v.endPoint.port || 80,
+            path: v.endPoint.path || "/get",
+            method: v.endPoint.method || "GET",
+            headers: {
+                accept: v.endPoint.headers.accept || "application/json"
+            }
+        },
+        data: v.data,
+        every: {
+            minute: v.every.minute || null,
+            hour: v.every.hour || null,
+            day: v.every.day || null,
+            weekday: v.every.weekday || null,
+            month: v.every.month || null,
+            year: v.every.year || null
+        },
+        enabled: false
+    }
+
+}
+
+/** 
  * Wrap arround schedules.json
  */
 module.exports = {
@@ -14,22 +40,23 @@ module.exports = {
         let _schedules = fs.readFileSync(schedulerFile).toString()
         try {
             return Array.from(JSON.parse(_schedules))
-        } catch (e) {            
+        } catch (e) {
+            logger('schedules - JSONSyntaxError: ' + e.message, 'error')
             return []
         }
     },
 
     find: function (name) {
-        
         let _schedule = this.all().find(s => s.name === name)
-        if(_schedule)
+        if (_schedule)
             return _schedule
-        
+
         logger(`No schedule ${name} found`, 'error')
-        return null        
+        return null
     },
 
     push: function (schedule) {
+        //schedule = validateSchedule(schedule)
         let _schedules = this.all()
             , position = _schedules.findIndex(s => s.name === schedule.name)
         if (position < 0)
@@ -37,12 +64,13 @@ module.exports = {
         else
             _schedules[position] = schedule
         fs.writeFileSync(schedulerFile, JSON.stringify(_schedules))
+        
     },
 
-    splice: function(name) {
+    splice: function (name) {
         let _schedules = this.all()
             , position = _schedules.findIndex(s => s.name === name)
         _schedules.splice(position, 1)
-        fs.writeFileSync(schedulerFile, JSON.stringify(_schedules))
+        fs.writeFileSync(schedulerFile, JSON.stringify(_schedules))        
     }
 }

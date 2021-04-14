@@ -1,6 +1,6 @@
 "use strict"
 
-const getSchedules = require('./getSchedules')
+const schedules = require('./schedules')
     , logger = require('../lib/logger')
     , week = {
         1: "Mon",
@@ -43,26 +43,15 @@ const processEvery = (every) => {
  * Runs scheduler
  */
 module.exports = () => {
-
-    let schedulesParsed = {}
-        , schedules = []
-        , triggerPattern = ''
+    let triggerPattern = ''
         , schedulePattern = ''
 
-    try {
-        schedulesParsed = JSON.parse(getSchedules())
-    } catch (JSONSyntaxError) {
-        logger('runScheduler - JSONSyntaxError: ' + JSONSyntaxError.message, 'error')
-        return
-    }
-
-    schedules = Array.from(schedulesParsed)
     triggerPattern = processTrigger(new Date())
 
-    for (let s of schedules) {
+    for (let s of schedules.all()) {
 
         if (!s.every || !s.endPoint || !s.enabled || !/http:|https:/.test(s.endPoint.protocol))
-            continue        
+            continue
 
         schedulePattern = processEvery(s.every)
         if (schedulePattern === triggerPattern) {
@@ -75,28 +64,25 @@ module.exports = () => {
 
             Object.assign(options, s.endPoint)
 
-            if (s.data ){
+            if (s.data) {
                 data = JSON.stringify(s.data)
                 options.headers['Content-Length'] = data.length
-            }            
+            }
 
             try {
-                request = http.request(options, (res) =>{
-                    res.on('data', (data) =>{
+                request = http.request(options, (res) => {
+                    /*res.on('data', (data) => 
                         logger(`runScheduler (${s.name}). Response: ${data}`, 'responses')
-                    })
+                    )*/
                     logger(`runScheduler (${s.name}). Status: ${res.statusCode}`, 'service')
-                }
-                    
-                )
+                })                
                 request.on('error', (e) =>
                     logger(`runScheduler (${s.name}). ResponseError: ${e.message}`, 'error')
                 )
                 request.write(data)
                 request.end()
-            } catch (e) /*istanbul ignore next*/{
-                logger(`runScheduler (${s.name}). RequestError: ${e.message}`, 'error')
-                continue
+            } catch (e) /*istanbul ignore next*/ {
+                logger(`runScheduler (${s.name}). RequestError: ${e.message}`, 'error')                
             }
         }
     }
