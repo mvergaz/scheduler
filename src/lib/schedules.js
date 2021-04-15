@@ -5,7 +5,13 @@ const fs = require('fs')
     , schedulerFile = path.resolve(process.env.PWD, 'schedules.json')
     , logger = require('./logger')
 
-const validateSchedule = (v) =>{
+//Nota: sería interesante usar fast-json-stringify para la serialización a disco
+//porque es sensiblemente más rápido que JSON.stringify y poque admite trabajar con ajv
+
+/**
+    Esto debería ser validado por la librería ajv (https://ajv.js.org/)
+*/
+const parseSchedule = (v) =>{
     return {
         name: v.name,
         endPoint: {
@@ -18,7 +24,7 @@ const validateSchedule = (v) =>{
                 accept: v.endPoint.headers.accept || "application/json"
             }
         },
-        data: v.data,
+        data: v.data || null,
         every: {
             minute: v.every.minute || null,
             hour: v.every.hour || null,
@@ -29,7 +35,6 @@ const validateSchedule = (v) =>{
         },
         enabled: false
     }
-
 }
 
 /** 
@@ -56,15 +61,16 @@ module.exports = {
     },
 
     push: function (schedule) {
-        //schedule = validateSchedule(schedule)
+        if(!schedule.name)
+            return
+        
         let _schedules = this.all()
             , position = _schedules.findIndex(s => s.name === schedule.name)
         if (position < 0)
-            _schedules.push(schedule)
+            _schedules.push( parseSchedule(schedule))
         else
-            _schedules[position] = schedule
-        fs.writeFileSync(schedulerFile, JSON.stringify(_schedules))
-        
+            _schedules[position] =  parseSchedule(schedule)
+        fs.writeFileSync(schedulerFile, JSON.stringify(_schedules))        
     },
 
     splice: function (name) {
