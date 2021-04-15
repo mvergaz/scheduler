@@ -18,6 +18,10 @@ describe('service unit tests', () => {
         fs.writeFileSync(serviceLogFile, '')
         fs.writeFileSync(errorLogFile, '')
         fs.writeFileSync(responsesLogFile, '')
+        fs.copyFileSync(
+            path.resolve(process.env.PWD, 'trash', 'schedules.json'),
+            schedulesFile
+        )
     })
 
     test('expects the config file to exist', async () => {
@@ -62,7 +66,8 @@ describe('service unit tests', () => {
     })
 
     test('expects scheduler to run httpbin', (done) => {
-        fs.writeFileSync(serviceLogFile, '')
+
+        
         let httpbin = schedulesDb.find('httpbin')
         httpbin.enabled = true
         schedulesDb.push(httpbin)
@@ -81,7 +86,6 @@ describe('service unit tests', () => {
     })
 
     test('expects scheduler to run anything', (done) => {
-
         let anything = schedulesDb.find('anything')
         anything.enabled = true
         schedulesDb.push(anything)
@@ -95,12 +99,11 @@ describe('service unit tests', () => {
             let serviceLogContents = fs.readFileSync(serviceLogFile).toString()
             expect(serviceLogContents).toMatch(new RegExp(expectedLog, "g"))
             done()
-
         }, 1000)
     })
 
     test('expects scheduler to catch ECONNREFUSED', (done) => {
-        fs.writeFileSync(errorLogFile, '')
+        
         let httpbin = schedulesDb.find('httpbin')
         httpbin.enabled = true
         httpbin.endPoint.hostname = 'localhost'
@@ -127,9 +130,8 @@ describe('service unit tests', () => {
         expect(schedules).toEqual([])
     })
 
-
-
     test('expects schedulesDb to find httpbin object', async () => {
+
         let httpbin = schedulesDb.find('httpbin')
         expect(httpbin.name).toBe('httpbin')
         expect(httpbin.endPoint.hostname).toBe('httpbin.org')
@@ -142,27 +144,17 @@ describe('service unit tests', () => {
     test('expects schedulesDb to push httpbin object', async () => {
         let httpbin = schedulesDb.find('httpbin')
         httpbin.enabled = true
-        schedulesDb.push(httpbin)
-
-        let schedules = JSON.parse(fs.readFileSync(schedulesFile).toString())
-            , schedule = schedules.find(s => s.name === 'httpbin')
-
-        httpbin.enabled = false
-        schedulesDb.push(httpbin)
-        expect(schedule.enabled).toBe(true)
+        expect(schedulesDb.push(httpbin)).toBe('ok')
     })
 
     test('expects schedulesDb to create and drop schedule', async () => {
         let newSchedule = {
-            name: "new"
+            name: "new",
+            endPoint:{},
+            every:{}
         }
-        schedulesDb.push(newSchedule)
-
-        let schedules = JSON.parse(fs.readFileSync(schedulesFile).toString())
-            , scheduleFound = schedules.find(s => s.name === 'new')
-
-        schedulesDb.splice(newSchedule.name)
-        expect(scheduleFound.name).toBe('new')
+        expect(schedulesDb.push(newSchedule)).toBe('ok')
+        expect(schedulesDb.splice("new")).toBe('ok')
     })
 
     test('expects find an "No schedule found" error', async () => {

@@ -15,6 +15,10 @@ describe('service integration tests', () => {
         fs.writeFileSync(serviceLogFile, '')
         fs.writeFileSync(errorLogFile, '')
         fs.writeFileSync(responsesLogFile, '')
+        fs.copyFileSync(
+            path.resolve(process.env.PWD, 'trash', 'schedules.json'),
+            path.resolve(process.env.PWD, 'schedules.json')
+        )
         server = require('../index')
     })
 
@@ -36,7 +40,6 @@ describe('service integration tests', () => {
     test('expects GET /schedules to return all schedules ', async () => {
         let response = await supertest(server).get('/schedules')
         expect(response.body).toStrictEqual(schedules.all())
-        expect(true).toBe(true)
     })
 
     test('expects GET /schedule/httpbin to return httpbin schedule ', async () => {
@@ -56,7 +59,9 @@ describe('service integration tests', () => {
 
     test('expects PUT /schedule to create new schedule ', async () => {
         let newSchedule = {
-            name: "new"
+            name: "new",
+            endPoint:{},
+            every:{}
         }
         await supertest(server).put('/schedule').send(newSchedule)
         let schedule = schedules.find('new')

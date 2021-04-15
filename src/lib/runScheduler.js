@@ -71,9 +71,9 @@ module.exports = () => {
 
             try {
                 request = http.request(options, (res) => {
-                    /*res.on('data', (data) => 
+                    res.on('data', (data) => 
                         logger(`runScheduler (${s.name}). Response: ${data}`, 'responses')
-                    )*/
+                    )
                     logger(`runScheduler (${s.name}). Status: ${res.statusCode}`, 'service')
                 })                
                 request.on('error', (e) =>

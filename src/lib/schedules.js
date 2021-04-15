@@ -11,7 +11,7 @@ const fs = require('fs')
 /**
     Esto debería ser validado por la librería ajv (https://ajv.js.org/)
 */
-const parseSchedule = (v) =>{
+const parseSchedule = (v) => {
     return {
         name: v.name,
         endPoint: {
@@ -20,9 +20,7 @@ const parseSchedule = (v) =>{
             port: v.endPoint.port || 80,
             path: v.endPoint.path || "/get",
             method: v.endPoint.method || "GET",
-            headers: {
-                accept: v.endPoint.headers.accept || "application/json"
-            }
+            headers: v.endPoint.headers || {}
         },
         data: v.data || null,
         every: {
@@ -33,7 +31,7 @@ const parseSchedule = (v) =>{
             month: v.every.month || null,
             year: v.every.year || null
         },
-        enabled: false
+        enabled: v.enabled || false
     }
 }
 
@@ -61,22 +59,24 @@ module.exports = {
     },
 
     push: function (schedule) {
-        if(!schedule.name)
-            return
-        
+        if (!schedule.name  || !schedule.endPoint)
+            return 'ko'
+
         let _schedules = this.all()
             , position = _schedules.findIndex(s => s.name === schedule.name)
         if (position < 0)
-            _schedules.push( parseSchedule(schedule))
+            _schedules.push(parseSchedule(schedule))
         else
-            _schedules[position] =  parseSchedule(schedule)
-        fs.writeFileSync(schedulerFile, JSON.stringify(_schedules))        
+            _schedules[position] = parseSchedule(schedule)
+        fs.writeFileSync(schedulerFile, JSON.stringify(_schedules))
+        return 'ok'
     },
 
     splice: function (name) {
         let _schedules = this.all()
             , position = _schedules.findIndex(s => s.name === name)
         _schedules.splice(position, 1)
-        fs.writeFileSync(schedulerFile, JSON.stringify(_schedules))        
+        fs.writeFileSync(schedulerFile, JSON.stringify(_schedules))
+        return 'ok'
     }
 }
